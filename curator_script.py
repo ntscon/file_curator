@@ -10,7 +10,7 @@ import time
 
 # place filepath in targ var
 
-targ = r'filepath'
+targ = r'root name'
 
 class fileData:
     def _init_(self, f_name, file_path, last_mod, last_access, file_size):
@@ -47,8 +47,16 @@ for root, dirs, files in os.walk(targ):
         target_file.file_size = path_stats.st_size
         file_array.append(target_file)
     for name in dirs:
-        print (name)
+        direct = folderData()
+        direct.folder_name = name
+        fold_path = os.path.join(root, name)
+        file_list = os.listdir(fold_path)
+        direct.num_files = len(file_list)
+        folder_array.append(direct)
 
 for i in file_array:
     print(i.f_name + "--- " + str(i.file_size))
+    
+for i in folder_array:
+    print (i.folder_name + "--- " + str(i.num_files))
         
