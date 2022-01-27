@@ -7,6 +7,7 @@ Created on Mon Jan 24 20:08:18 2022
 
 import os
 import time
+from datetime import datetime
 
 # place filepath in targ var
 
@@ -24,12 +25,12 @@ class fileData:
         
 class folderData:
     def _init_(self, folder_name, num_files, num_folders, last_file_mod, 
-               last_child_mod, folder_path, file_list):
+               last_file_acc, folder_path, file_list):
         self.folder_name = folder_name
         self.num_files = num_files
         self.num_folders = num_folders
         self.last_file_mod = last_file_mod
-        self.last_child_mod = last_child_mod
+        self.last_file_acc = last_file_acc
         self.folder_path = folder_path
         self.file_list = file_list
         
@@ -37,16 +38,26 @@ file_array = []
 folder_array = []
 
 for root, dirs, files in os.walk(targ):
+    root_folder = folderData()
+    root_folder.folder_name = root
+    root_folder.folder_path = root
+    root_folder.last_file_mod = datetime(1900,1,1)
+    root_folder.last_file_acc = datetime(1900,1,1)
+    root_folder.num_files = 0
+    folder_array.append(root_folder)
     for name in dirs:
-        direct = folderData()
-        direct.folder_name = name
         fold_path = os.path.join(root, name)
-        direct.folder_path = fold_path
-        file_list = [f for f in os.listdir('.') if os.path.isfile(f)]
-        direct.file_list = file_list
-        direct.num_files = len(file_list)
-        folder_array.append(direct)
-    
+        for i in folder_array:
+            if (i.folder_path == fold_path): 
+                # direct = folderData()
+                print(name)
+                i.folder_name = name
+                # fold_path = os.path.join(root, name)
+                # direct.folder_path = fold_path
+                # file_list = [f for f in os.listdir('.') if os.path.isfile(f)]
+                # direct.file_list = file_list
+                # i.num_files = 0
+                # folder_array.append(direct)
     for name in files:
         full_path = os.path.join(root, name)        
         path_stats = os.stat(full_path)
@@ -63,7 +74,21 @@ for root, dirs, files in os.walk(targ):
 
 
 for i in file_array:
-    print(i.folder+ "--- " + str(i.file_size))
+    # print(i.f_name+ "--- " + str(i.file_size))
+    file_folder = i.folder
+    for j in folder_array:
+        folder_folder = j.folder_path
+        if file_folder == folder_folder:
+            j.num_files  = j.num_files + 1
+            mod_date = datetime.strptime(i.last_mod, "%a %b %d %H:%M:%S %Y")
+            if mod_date > j.last_file_mod :
+                j.last_file_mod =  mod_date
+                print(j.folder_path + ": " + str(j.last_file_mod))
+            acc_date = datetime.strptime(i.last_access, "%a %b %d %H:%M:%S %Y")
+            j.last_file_acc =  acc_date if acc_date > j.last_file_acc else  j.last_file_acc
+            # print(j.folder_path + ": " + str(j.num_files) + " "+ str(mod_date)) 
+            continue
+            
     
 for i in folder_array:
-    print (i.folder_path + "--- " )        
+    print (i.folder_path + "--- \n" + str(i.last_file_mod))        
