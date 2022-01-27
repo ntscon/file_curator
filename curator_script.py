@@ -41,6 +41,7 @@ for root, dirs, files in os.walk(targ):
         direct = folderData()
         direct.folder_name = name
         fold_path = os.path.join(root, name)
+        direct.folder_path = fold_path
         file_list = [f for f in os.listdir('.') if os.path.isfile(f)]
         direct.file_list = file_list
         direct.num_files = len(file_list)
@@ -64,5 +65,5 @@ for root, dirs, files in os.walk(targ):
 for i in file_array:
     print(i.folder+ "--- " + str(i.file_size))
     
-# for i in folder_array:
-#     print (i.folder_name + "--- " + str(i.num_files) + "--- " )        
+for i in folder_array:
+    print (i.folder_path + "--- " )        
