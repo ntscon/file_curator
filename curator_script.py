@@ -8,16 +8,18 @@ Created on Mon Jan 24 20:08:18 2022
 import os
 import time
 from datetime import datetime
+import xlwings as xw
 
 # place filepath in targ var
 
 targ = r'root'
 
 class fileData:
-    def _init_(self, f_name, file_path, last_mod, last_access, 
+    def _init_(self, f_name, file_path, create_time, last_mod, last_access, 
                file_size, folder):
         self.f_name = f_name
         self.file_path = file_path
+        self.create_time = create_time
         self.last_mod = last_mod
         self.last_access =  last_access
         self.file_size = file_size
@@ -36,6 +38,7 @@ class folderData:
         
 file_array = []
 folder_array = []
+same_name_size_ = []
 
 for root, dirs, files in os.walk(targ):
     root_folder = folderData()
@@ -49,29 +52,25 @@ for root, dirs, files in os.walk(targ):
         fold_path = os.path.join(root, name)
         for i in folder_array:
             if (i.folder_path == fold_path): 
-                # direct = folderData()
                 print(name)
                 i.folder_name = name
-                # fold_path = os.path.join(root, name)
-                # direct.folder_path = fold_path
-                # file_list = [f for f in os.listdir('.') if os.path.isfile(f)]
-                # direct.file_list = file_list
-                # i.num_files = 0
-                # folder_array.append(direct)
     for name in files:
         full_path = os.path.join(root, name)        
         path_stats = os.stat(full_path)
+        creation_time = path_stats.st_ctime
         mod_time = path_stats.st_mtime
         access_time = path_stats.st_atime
         target_file = fileData()        
         target_file.folder = root
         target_file.f_name = name
         target_file.file_path =  full_path
+        target_file.create_time = time.ctime(creation_time)
         target_file.last_mod = time.ctime(mod_time)
         target_file.last_access = time.ctime(access_time)
         target_file.file_size = path_stats.st_size
         file_array.append(target_file)
 
+wb = xw.Book()
 
 for i in file_array:
     # print(i.f_name+ "--- " + str(i.file_size))
