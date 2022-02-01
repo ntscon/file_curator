@@ -10,11 +10,9 @@ import time
 from datetime import datetime
 import xlwings as xw
 
-defaultDate = datetime(1900,1,1)
-
 # place filepath in targ var
 
-targ = r'root'
+targ = r'C:\Users\Nathan\Desktop\Cosa_mia'
 
 class fileData:
     def _init_(self, f_name, file_path, create_time, last_mod, last_access, 
@@ -28,16 +26,15 @@ class fileData:
         self.folder = folder
         
 class folderData:
-    def _init_(self, folder_name, num_files, child_folders, last_file_mod, 
-               last_file_acc, folder_path, file_list, all_cut):
+    def _init_(self, folder_name, num_files, num_folders, last_file_mod, 
+               last_file_acc, folder_path, file_list):
         self.folder_name = folder_name
         self.num_files = num_files
-        self.child_folders = child_folders
+        self.num_folders = num_folders
         self.last_file_mod = last_file_mod
         self.last_file_acc = last_file_acc
         self.folder_path = folder_path
         self.file_list = file_list
-        self.all_cut = all_cut
         
 file_array = []
 folder_array = []
@@ -47,9 +44,8 @@ for root, dirs, files in os.walk(targ):
     root_folder = folderData()
     root_folder.folder_name = root
     root_folder.folder_path = root
-    root_folder.child_folders = dirs
-    root_folder.last_file_mod = defaultDate
-    root_folder.last_file_acc = defaultDate
+    root_folder.last_file_mod = datetime(1900,1,1)
+    root_folder.last_file_acc = datetime(1900,1,1)
     root_folder.num_files = 0
     folder_array.append(root_folder)
     for name in dirs:
@@ -58,7 +54,6 @@ for root, dirs, files in os.walk(targ):
             if (i.folder_path == fold_path): 
                 # print(name)
                 i.folder_name = name
-                
     for name in files:
         full_path = os.path.join(root, name)        
         path_stats = os.stat(full_path)
@@ -76,11 +71,7 @@ for root, dirs, files in os.walk(targ):
         file_array.append(target_file)
 
 wb = xw.Book()
-wb.save(r'root')
-folderSheet = wb.sheets.add('before cut off')
-fileSheet = wb.sheets.add('duplicate files')
-        
-cutOffDate = datetime(2020,8,1)
+wb.save(r'C:\Users\Nathan\Desktop\Cosa_mia\new_book.xlsx')
 
 for i in file_array:
     # print(i.f_name+ "--- " + str(i.file_size))
@@ -98,40 +89,6 @@ for i in file_array:
             # print(j.folder_path + ": " + str(j.num_files) + " "+ str(mod_date)) 
             continue
             
-
-currCount = 2
-
-for i in reversed(folder_array):
-    if (i.last_file_mod < cutOffDate and i.last_file_mod != defaultDate):
-        folderSheet.range(currCount, 3).value = i.folder_path
-        folderSheet.range(currCount, 4).value = i.last_file_mod
-        currCount = currCount + 1
-        print (i.folder_path + "--- \n" + str(i.last_file_mod) + "--- \n" +
-               str(i.child_folders) )
-        thisVar = True
-        
-        
-stopPoint = len(file_array)
-
-dupPaths = []
-
-currCount = 2
-
-for i, file in enumerate(file_array):
-    focMod = file.last_mod
-    focName = file.f_name
-    focSize = file.file_size
-    focFolder = file.folder
-    focFP = file.file_path
-    for j in range(i, stopPoint):
-        susFile = file_array[j]
-        if susFile.file_size == focSize and susFile.folder != focFolder \
-            and dupPaths.count(susFile.file_path) < 1:
-            # print("possible duplicate: " + str(susFile.f_name))
-            if (susFile.last_mod == focMod and susFile.f_name == focName):
-                fileSheet.range(currCount, 3).value =  susFile.file_path
-                fileSheet.range(currCount, 4).value =  focFP
-                currCount = currCount + 1
-                print("likely duplicate: " + "\n   " + susFile.file_path +
-                      "\n   " + focFP)
-                dupPaths.append(susFile.file_path)
+    
+for i in folder_array:
+    print (i.folder_path + "--- \n" + str(i.last_file_mod))        
