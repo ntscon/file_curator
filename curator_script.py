@@ -56,7 +56,6 @@ for root, dirs, files in os.walk(targ):
         fold_path = os.path.join(root, name)
         for i in folder_array:
             if (i.folder_path == fold_path): 
-                # print(name)
                 i.folder_name = name
                 
     for name in files:
@@ -83,7 +82,6 @@ fileSheet = wb.sheets.add('duplicate files')
 cutOffDate = datetime(2020,8,1)
 
 for i in file_array:
-    # print(i.f_name+ "--- " + str(i.file_size))
     file_folder = i.folder
     for j in folder_array:
         folder_folder = j.folder_path
@@ -92,23 +90,43 @@ for i in file_array:
             mod_date = datetime.strptime(i.last_mod, "%a %b %d %H:%M:%S %Y")
             if mod_date > j.last_file_mod :
                 j.last_file_mod =  mod_date
-                # print(j.folder_path + ": " + str(j.last_file_mod))
             acc_date = datetime.strptime(i.last_access, "%a %b %d %H:%M:%S %Y")
-            j.last_file_acc =  acc_date if acc_date > j.last_file_acc else  j.last_file_acc
-            # print(j.folder_path + ": " + str(j.num_files) + " "+ str(mod_date)) 
+            j.last_file_acc =  acc_date if acc_date > j.last_file_acc else j.last_file_acc
             continue
             
 
 currCount = 2
 
-for i in reversed(folder_array):
-    if (i.last_file_mod < cutOffDate and i.last_file_mod != defaultDate):
-        folderSheet.range(currCount, 3).value = i.folder_path
-        folderSheet.range(currCount, 4).value = i.last_file_mod
+folder_array_length = len(folder_array)
+
+for i, file in enumerate(reversed(folder_array)):
+    file.all_cut = False
+    if (file.last_file_mod < cutOffDate and file.last_file_mod != defaultDate):
+        if (not file.child_folders):
+            file.all_cut = True
+        else:
+            file.all_cut = True
+            for child_f in file.child_folders:
+                if file.all_cut == False:
+                    continue
+                full_child = os.path.join(file.folder_path, child_f) 
+                for j in range(1,i+1):
+                    examine = folder_array_length - j
+                    if (folder_array[examine].folder_path == full_child):
+                        aaaaa = folder_array[examine]
+                        if (folder_array[examine].all_cut == False):
+                            file.all_cut = False
+                            continue
+
+        if file.child_folders and file.all_cut:
+            folderSheet.range(currCount, 2).value = "True"
+        if file.child_folders:
+            folderSheet.range(currCount, 4).value = str(file.child_folders)
+        folderSheet.range(currCount, 3).value = file.folder_path
+        folderSheet.range(currCount, 1).value = file.last_file_mod
+
         currCount = currCount + 1
-        print (i.folder_path + "--- \n" + str(i.last_file_mod) + "--- \n" +
-               str(i.child_folders) )
-        thisVar = True
+
         
         
 stopPoint = len(file_array)
@@ -127,8 +145,8 @@ for i, file in enumerate(file_array):
         susFile = file_array[j]
         if susFile.file_size == focSize and susFile.folder != focFolder \
             and dupPaths.count(susFile.file_path) < 1:
-            # print("possible duplicate: " + str(susFile.f_name))
             if (susFile.last_mod == focMod and susFile.f_name == focName):
+                fileSheet.range(currCount, 2).value =  focName
                 fileSheet.range(currCount, 3).value =  susFile.file_path
                 fileSheet.range(currCount, 4).value =  focFP
                 currCount = currCount + 1
