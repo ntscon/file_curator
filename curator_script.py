@@ -14,7 +14,7 @@ defaultDate = datetime(1900,1,1)
 
 # place filepath in targ var
 
-targ = r'root'
+targ = r'C:\Users\Nathan\Desktop\Cosa_mia'
 
 class fileData:
     def _init_(self, f_name, file_path, create_time, last_mod, last_access, 
@@ -59,23 +59,28 @@ for root, dirs, files in os.walk(targ):
                 i.folder_name = name
                 
     for name in files:
-        full_path = os.path.join(root, name)        
-        path_stats = os.stat(full_path)
-        creation_time = path_stats.st_ctime
-        mod_time = path_stats.st_mtime
-        access_time = path_stats.st_atime
-        target_file = fileData()        
-        target_file.folder = root
-        target_file.f_name = name
+        full_path = os.path.join(root, name)
+        target_file = fileData()         
         target_file.file_path =  full_path
-        target_file.create_time = time.ctime(creation_time)
-        target_file.last_mod = time.ctime(mod_time)
-        target_file.last_access = time.ctime(access_time)
-        target_file.file_size = path_stats.st_size
-        file_array.append(target_file)
+        target_file.last_mod = defaultDate
+        target_file.last_access = defaultDate
+        try: 
+            path_stats = os.stat(full_path)
+            creation_time = path_stats.st_ctime
+            mod_time = path_stats.st_mtime
+            access_time = path_stats.st_atime       
+            target_file.folder = root
+            target_file.f_name = name
+            target_file.file_path =  full_path
+            target_file.create_time = time.ctime(creation_time)
+            target_file.last_mod = time.ctime(mod_time)
+            target_file.last_access = time.ctime(access_time)
+            target_file.file_size = path_stats.st_size
+            file_array.append(target_file)
+        except: continue
 
 wb = xw.Book()
-wb.save(r'root')
+wb.save(r'C:\Users\Nathan\Desktop\Cosa_mia\1.xlsx')
 folderSheet = wb.sheets.add('before cut off')
 fileSheet = wb.sheets.add('duplicate files')
         
